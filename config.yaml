@@ -1,0 +1,37 @@
+# this is the only file we edit to swap models
+stt:
+  # which STT provider to use
+  provider: whisper_faster
+
+  # whisper model size. 
+  # options: tiny , base, small, medium, large-v3
+  model_size: medium
+
+  # language hint. "hi" (covers hinflish)
+  # whisper will still transcribe English words in the audio
+  language: hi
+
+  # how to quantize the model for faster CPU inference.
+  # int8 = fastest, slight accuracy trade-off
+  # float16 = more accurate, needs more RAM
+  compute_type: int8
+
+tts:
+  # which TTS provider to use
+  # options: coqui_xtts, indic_parler, piper
+  provider: coqui_xtts
+
+  # device to run on
+  # mps : Apple M2 GPU (fast), cpu = Fallback
+  device: mps
+
+  voice_id: default
+
+  #plaback speed multiplier
+  speed: 1.0
+
+# admin credentials (simple, local_only auth)
+
+admin:
+  username: admin
+  password: 123456

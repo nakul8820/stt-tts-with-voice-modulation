@@ -1,0 +1,27 @@
+# ── Web framework ──────────────────────────────────────────────
+fastapi                # the web framework for our API
+uvicorn[standard]      # ASGI server that runs FastAPI
+python-multipart       # needed for FastAPI to accept file uploads
+
+# ── STT dependencies ───────────────────────────────────────────
+faster-whisper         # fast Whisper inference using ctranslate2
+# vosk                 # uncomment if you want to try Vosk STT
+
+# ── TTS dependencies ───────────────────────────────────────────
+TTS                    # Coqui TTS — includes XTTS v2
+# piper-tts            # uncomment if you want to try Piper
+
+# ── Indic Parler-TTS ───────────────────────────────────────────
+transformers           # HuggingFace transformers (Parler uses this)
+torch                  # PyTorch — needed by both XTTS and Parler
+parler-tts             # Indic Parler-TTS package
+
+# ── Audio processing ───────────────────────────────────────────
+soundfile              # read/write audio files in Python
+numpy                  # array math, used by all audio libs
+
+# ── Utilities ──────────────────────────────────────────────────
+pyyaml                 # read config.yaml
+psutil                 # CPU and RAM usage for monitor/stats.py
+huggingface_hub        # download models from HuggingFace
+requests               # HTTP requests, used in download_models.py

@@ -1,0 +1,9 @@
+Project Objective : 
+
+1. STT (speech to text ) 
+2. TSS (text to speech )
+3. Language - Hinglish 
+4. Voice modulation ( with manual adjusting or if possible in-built voice )
+5. FastAPI backend 
+6. System should run offline ( no online service )
+7. Keep stats of latency for different models 

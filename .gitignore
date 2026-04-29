@@ -36,3 +36,15 @@ ENV/
 
 # OS
 .DS_Store
+
+# Models (Large files)
+models/
+*.pth
+*.bin
+*.onnx
+
+# Data & Audio outputs
+static/audio/
+temp_audio/
+*.wav
+*.mp3

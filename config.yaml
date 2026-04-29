@@ -1,7 +1,7 @@
 # this is the only file we edit to swap models
 stt:
   # which STT provider to use
-  provider: whisper_faster
+  provider: whisper_cpp
 
   # whisper model size. 
   # options: tiny , base, small, medium, large-v3
@@ -27,11 +27,133 @@ tts:
 
   voice_id: default
 
-  #plaback speed multiplier
-  speed: 1.0
-
 # admin credentials (simple, local_only auth)
 
 admin:
   username: admin
   password: 123456
+
+# Modulation
+
+modulation:
+  # which preset is currently active
+  # when admin picks a preset, this updates + all the value below update.
+  active_preset: natural
+
+  # layer 1 params :
+  # these affects how nueral network generates speech
+
+  expresssiveness: 5
+  # admin slider 1-10
+  # internally maps to XTTS temperature: 1 -> 0.1 , 5->0.5 , 10-> 1.0
+  # low = flat/ robotic, high = animated/emotional
+
+  speed_model: 1.0
+  #admin slider : 0.5-> 2.0X
+  # passed directyly as speed= to model.inference()
+  # affects rythm at the neural level not just duration
+
+  # Layer 2 Param ( applied to WAV bytes after generation)
+  # these are post-processing - work with ANY model provider.
+
+  pitch_semitones: 0
+  # admin slider -8 to +8 ( shown as deeper <- -> Higher )
+  # internally : librosa.effects.pitch_shift(n_steps=pitch_semitones)
+  # 0 = no change, -4 = Noticeably deeper , +4 = noticeably higher
+
+  speed_post: 1.0
+  # separate from speed_model above 
+  # internally: librosa.effects.time_stretch(rate=speed_post)
+  # this changes duration WITHOUT changing pitch
+  # combined with speed_model they give you merged "speaking speed" slider
+
+  volume_gain: 1.0
+  # admin slidier 1-10 to 0.5-2.0 multiplier.
+  # audio_array * volumne_gain before output
+
+  bass: 0
+  # admin slider -5 to 5 ( shown as warmth)
+  # intenally : scipy low-shelf EQ filter at 2000Hz
+  # +5 = warm/ crisp , -5 = muffled
+
+  reverb: false
+  # toggle. Internally: scipy.signal.fftconvolve with simple
+  # exponential decay impulse response (no external IR file needed)
+
+  denoise: true
+  # toggle. Internally: scipy.signal.fftconvolve with simple
+  # exponential decay impulse response ( no external IR file needed)
+
+  denoise: true
+  # tooggle . Internally: noisereduce.reduce_noise()
+  # removes hiss/artifacts
+
+  normalize: true
+  # toggle . Internally : peak normalize to ~3dB
+  # ensure consistent loudness across all outputs
+
+# Presets - named groups of modulation values
+# Admin picks a preset from UI -> values above get replaced
+# Admin can also save a 'custom' preset from their slider 
+
+presets:
+  natural:
+    expressiveness: 5
+    speed_model: 1.0
+    pitch_semitones: 0
+    speed_post: 1.0
+    volume_gain: 1.0
+    bass: 0
+    treble: 0
+    reverb: false
+    denoise: true
+    normaize: true
+
+  formal:
+    expressiveness: 3
+    speed_model: 0.9
+    pitch_semitones: -1
+    speed_post: 0.95
+    volume_gain: 1.0
+    bass: 1
+    treble: -1
+    reverb: false
+    denoise: true
+    normaize: true
+
+  friendly:
+    expressiveness: 7
+    speed_model: 1.1
+    pitch_semitones: 1
+    speed_post: 1.05
+    volume_gain: 1.0
+    bass: 0
+    treble: 1
+    reverb: false
+    denoise: true
+    normaize: true
+
+  deep:
+    expressiveness: 4
+    speed_model: 0.9
+    pitch_semitones: -4
+    speed_post: 0.9
+    volume_gain: 1.1
+    bass: 3
+    treble: -2
+    reverb: false
+    denoise: true
+    normaize: true
+  
+  custom:
+    # Starts as a copy of natural.
+    # Updated when admin saves from their own slider values.
+    expressiveness: 5
+    speed_model: 1.0
+    pitch_semitones: 0
+    speed_post: 1.0
+    volume_gain: 1.0
+    bass: 0
+    treble: 0
+    reverb: false
+    denoise: true

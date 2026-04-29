@@ -19,6 +19,8 @@ parler-tts             # Indic Parler-TTS package
 # ── Audio processing ───────────────────────────────────────────
 soundfile              # read/write audio files in Python
 numpy                  # array math, used by all audio libs
+noisereduce    # noise reduction for TTS output cleanup
+scipy          # signal processing for EQ and reverbpip
 
 # ── Utilities ──────────────────────────────────────────────────
 pyyaml                 # read config.yaml

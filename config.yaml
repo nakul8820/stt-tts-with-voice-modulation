@@ -1,6 +1,7 @@
 admin:
   password: 123456
   username: admin
+
 modulation:
   active_preset: natural
   bass: 0
@@ -14,6 +15,7 @@ modulation:
   speed_post: 1.0
   treble: 0
   volume_gain: 1.5
+
 presets:
   custom:
     bass: 0
@@ -25,6 +27,7 @@ presets:
     speed_post: 1.0
     treble: 0
     volume_gain: 1.0
+  
   deep:
     bass: 3
     denoise: true
@@ -36,6 +39,7 @@ presets:
     speed_post: 0.9
     treble: -2
     volume_gain: 1.1
+  
   formal:
     bass: 1
     denoise: true
@@ -47,6 +51,7 @@ presets:
     speed_post: 0.95
     treble: -1
     volume_gain: 1.0
+  
   friendly:
     bass: 0
     denoise: true
@@ -58,6 +63,7 @@ presets:
     speed_post: 1.05
     treble: 1
     volume_gain: 1.0
+
   natural:
     bass: 0
     denoise: true
@@ -69,11 +75,13 @@ presets:
     speed_post: 1.0
     treble: 0
     volume_gain: 1.0
+
 stt:
   compute_type: float16
   language: hi
   model_size: medium
   provider: whisper_cpp
+
 tts:
   device: mps
   provider: coqui_xtts

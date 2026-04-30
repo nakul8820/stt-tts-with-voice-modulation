@@ -44,15 +44,23 @@ class WhisperFasterProvider(BaseSTTProvider):
         """
         print(f"[WhisperFaster] Loading Model: {self.model_size}...")
 
-        self.model = WhisperModel(
-            self.model_size,
-            device="cpu",
-            # always CPU for faster-whisper - CTranslate2
-            # doesn't support MPS backend
-            compute_type = self.computer_type
-        )
-        
-        print(f"[WhisperFaster] Model loaded successfully")
+        try:
+            # Try loading from local cache first
+            self.model = WhisperModel(
+                self.model_size,
+                device="cpu",
+                compute_type=self.compute_type,
+                local_files_only=True
+            )
+            print(f"[WhisperFaster] Model loaded from local cache.")
+        except Exception:
+            print(f"[WhisperFaster] Local model not found or internet check required. Attempting download...")
+            self.model = WhisperModel(
+                self.model_size,
+                device="cpu",
+                compute_type=self.compute_type
+            )
+            print(f"[WhisperFaster] Model downloaded and loaded successfuly")
 
     def transcribe(self, audio_bytes: bytes) -> dict:
         """
@@ -65,9 +73,9 @@ class WhisperFasterProvider(BaseSTTProvider):
         5. return dict with text amd detected language
         """
         # step 1 , temp .wav file
-        with tempfile.NamedTemporaryFile(suffix=".wav",delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_file:
             tmp_file.write(audio_bytes)
-            tmp.path = tmp_file.name
+            tmp_path = tmp_file.name
 
         try:
             # step 2 Run transcription

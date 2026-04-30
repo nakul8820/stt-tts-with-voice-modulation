@@ -84,6 +84,10 @@ def get_tts_provider() -> BaseTTSProvider:
         from providers.tts.indic_parler import IndicParlerProvider
         return IndicParlerProvider(tts_cfg)
 
+    elif provider_name == "mms":
+        from providers.tts.mms_provider import MMSProvider
+        return MMSProvider(tts_cfg)
+
     elif provider_name == "piper":
         from providers.tts.piper_provider import PiperProvider
         return PiperProvider(tts_cfg)

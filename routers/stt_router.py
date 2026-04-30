@@ -3,7 +3,7 @@
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from core.base_stt import BaseSTTPProvider
+from core.base_stt import BaseSTTProvider
 from monitor.stats import Stats
 
 router = APIRouter(prefix="/api", tags=["STT"])

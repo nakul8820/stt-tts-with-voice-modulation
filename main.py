@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.factory import get_stt_provider, get_tts_provider
 from routers import stt_router, tts_router
+from monitor.stats import Stats  # Add this import
 
 # ── Environment Setup ──
 # Force Coqui TTS and other models to use the local 'models' folder
@@ -82,6 +83,19 @@ app.add_middleware(
 # Register our routers — this adds all the /api/... routes
 app.include_router(stt_router.router)
 app.include_router(tts_router.router)
+
+# ── Monitor Endpoints ──────────────────────────────────────────
+# These are called by the performance dashboard in the frontend.
+
+@app.get("/api/stats")
+async def get_stats():
+    """Returns averages of all recorded STT/TTS requests."""
+    return Stats.summary()
+
+@app.get("/api/system")
+async def get_system_stats():
+    """Returns live system CPU and RAM usage."""
+    return Stats.get_system_stats()
 
 # Serve the static folder (index.html) at the root URL.
 # IMPORTANT: mount static LAST — after all API routes.

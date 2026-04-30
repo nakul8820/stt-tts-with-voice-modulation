@@ -23,13 +23,14 @@ class CoquiXTTSProvider(BaseTTSProvider):
     def __init__(self, cfg: dict):
         self.device = cfg.get("device", "cpu")
         self.voice_id = cfg.get("voice_id", "default")
+        self.language = cfg.get("language", "hi")
         self.model = None
         self.config = None
 
         # voice_profiles maps voice_id → path to reference .wav
-        # "default" = None means use XTTS built-in default speaker
+        # Use the local reference.wav for the default voice
         self.voice_profiles = {
-            "default": None,
+            "default": "reference.wav",
         }
 
     def load(self) -> None:
@@ -49,13 +50,34 @@ class CoquiXTTSProvider(BaseTTSProvider):
 
         print(f"[CoquiXTTS] Loading XTTS v2 on {self.device} ...")
 
-        # Find where Coqui cached the model after download_models.py ran
-        manager = ModelManager()
-        model_path, config_path, _ = manager.download_model(
-            "tts_models/multilingual/multi-dataset/xtts_v2"
-        )
-        # model_path = directory containing model checkpoint files
-        # config_path = path to config.json
+        model_name = "tts_models/multilingual/multi-dataset/xtts_v2"
+        
+        # 1. Determine local paths
+        # We expect it in: models/tts/tts_models--multilingual--multi-dataset--xtts_v2
+        import os
+        tts_home = os.environ.get("TTS_HOME")
+        if not tts_home:
+            # Fallback if environment variable not set
+            project_root = os.getcwd()
+            tts_home = os.path.join(project_root, "models", "tts")
+            
+        local_model_dir = os.path.join(tts_home, model_name.replace("/", "--"))
+        config_path = os.path.join(local_model_dir, "config.json")
+        
+        if os.path.exists(config_path):
+            print(f"[CoquiXTTS] Found local model files at {local_model_dir}")
+            model_path = local_model_dir
+        else:
+            print(f"[CoquiXTTS] Local model not found at {local_model_dir}. Attempting download...")
+            try:
+                manager = ModelManager()
+                model_path, config_path, _ = manager.download_model(model_name)
+            except Exception as e:
+                print(f"[CoquiXTTS] Error: Could not download or find model: {e}")
+                print("[CoquiXTTS] Please run 'python download_models.py' while online.")
+                # If we fail here, the app might crash later if self.model is None.
+                # But at least we show a clear error message.
+                raise
 
         # Load config from the cached directory
         self.xtts_config = XttsConfig()
@@ -71,7 +93,20 @@ class CoquiXTTSProvider(BaseTTSProvider):
         )
         self.model.to(self.device)
 
-        print("[CoquiXTTS] XTTS v2 loaded.")
+        # ── OPTIMIZATION: Pre-compute speaker latents ──
+        # We compute the "voice identity" once during startup.
+        # This saves 1-2 seconds per request.
+        print(f"[CoquiXTTS] Pre-computing speaker latents for {self.voice_profiles['default']}...")
+        ref_path = self.voice_profiles.get("default")
+        if ref_path and os.path.exists(ref_path):
+            self.default_gpt_cond, self.default_speaker_embedding = \
+                self.model.get_conditioning_latents(audio_path=[ref_path])
+        else:
+            speaker_name = "Daisy Studious"
+            self.default_gpt_cond = self.model.speaker_manager.speakers[speaker_name]["gpt_cond_latent"]
+            self.default_speaker_embedding = self.model.speaker_manager.speakers[speaker_name]["speaker_embedding"]
+
+        print("[CoquiXTTS] XTTS v2 loaded and optimized.")
 
     def add_voice_profile(self, voice_id: str, wav_path: str) -> None:
         """
@@ -83,77 +118,25 @@ class CoquiXTTSProvider(BaseTTSProvider):
 
     def synthesize(self, text: str, voice_id: str = "default") -> bytes:
         """
-        Generate speech using model.inference() (low-level API).
-        This is the only XTTS API that accepts speed + temperature.
-
-        Steps:
-        1. Get Layer 1 params from modulation config
-        2. Get speaker conditioning latents (voice identity)
-        3. Run inference with all params
-        4. Return WAV bytes
+        Generate speech using optimized inference.
         """
-
-        # ── Step 1: Get Layer 1 params from modulation config ──
-        # These are read fresh on every call so admin changes
-        # take effect without restarting the server.
         layer1 = get_layer1_params()
-        temperature = layer1["temperature"]   # 0.1–1.0
-        speed       = layer1["speed"]         # 0.5–2.0
+        temperature = layer1["temperature"]
+        speed       = layer1["speed"]
 
-        # ── Step 2: Get speaker conditioning latents ───────────
-        # Conditioning latents encode the voice identity from
-        # the reference audio. They tell the model "sound like this."
-        ref_wav = self.voice_profiles.get(voice_id)
-        # ref_wav is None for "default", or a .wav path for cloned voices
+        print(f"[CoquiXTTS] Synthesizing: '{text}' (temp={temperature}, speed={speed})")
 
-        if ref_wav is None:
-            # No reference audio — use a short silence as placeholder.
-            # XTTS will use its built-in default speaker characteristics.
-            import tempfile, os
-            silence = np.zeros(int(0.5 * 22050), dtype=np.float32)
-            # 0.5 seconds of silence at 22050Hz (XTTS input sample rate)
-            tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-            sf.write(tmp.name, silence, 22050)
-            tmp.close()
-            ref_paths = [tmp.name]
-            cleanup_tmp = True
-        else:
-            ref_paths = [ref_wav]
-            cleanup_tmp = False
-
-        try:
-            # get_conditioning_latents encodes the reference audio
-            # into two tensors that capture speaker identity:
-            # gpt_cond_latent: GPT conditioning (prosody/rhythm)
-            # speaker_embedding: speaker identity vector
-            gpt_cond_latent, speaker_embedding = \
-                self.model.get_conditioning_latents(audio_path=ref_paths)
-
-            # ── Step 3: Run inference ───────────────────────────
+        # ── OPTIMIZATION: Use torch.inference_mode() ──
+        with torch.inference_mode():
             out = self.model.inference(
                 text=text,
-                language="hi",
-                # "hi" handles Hinglish — XTTS detects English
-                # words within Hindi context automatically
-
-                gpt_cond_latent=gpt_cond_latent,
-                speaker_embedding=speaker_embedding,
-
-                # ── Layer 1 modulation params ──
+                language=self.language,
+                gpt_cond_latent=self.default_gpt_cond,
+                speaker_embedding=self.default_speaker_embedding,
                 temperature=temperature,
-                # Low = deterministic/flat, High = varied/expressive
-
                 speed=speed,
-                # Affects token generation rate (rhythm at model level)
-
                 repetition_penalty=2.0,
-                # Prevents model from repeating phonemes/words.
-                # 2.0 is a good default. Higher = stricter.
             )
-
-        finally:
-            if cleanup_tmp:
-                os.unlink(ref_paths[0])
 
         # out["wav"] is a numpy array of float32 audio samples
         audio_np = np.array(out["wav"], dtype=np.float32)

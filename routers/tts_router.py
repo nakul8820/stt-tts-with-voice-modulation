@@ -55,12 +55,12 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     # secrets.compare_digest prevents timing attacks —
     # always takes the same time regardless of where strings differ.
     username_ok = secrets.compare_digest(
-        credentials.username,
-        admin_cfg.get("username", "admin")
+        str(credentials.username),
+        str(admin_cfg.get("username", "admin"))
     )
     password_ok = secrets.compare_digest(
-        credentials.password,
-        admin_cfg.get("password", "changeme123")
+        str(credentials.password),
+        str(admin_cfg.get("password", "changeme123"))
     )
 
     if not (username_ok and password_ok):

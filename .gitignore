@@ -48,3 +48,12 @@ static/audio/
 temp_audio/
 *.wav
 *.mp3
+*.aiff
+
+# HuggingFace & Cache
+.cache/
+.huggingface/
+hub/
+
+# Logs
+*.log

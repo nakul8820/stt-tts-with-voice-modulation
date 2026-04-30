@@ -10,6 +10,7 @@
 # ─────────────────────────────────────────────────────────────
 
 import io
+import os
 import torch
 import numpy as np
 import soundfile as sf
@@ -41,29 +42,38 @@ class IndicParlerProvider(BaseTTSProvider):
         )
 
     def load(self) -> None:
-        """Load Indic Parler-TTS model and tokenizers."""
+        """Load Indic Parler-TTS model from local folder."""
         from parler_tts import ParlerTTSForConditionalGeneration
         from transformers import AutoTokenizer
 
-        if self.device == "mps" and not torch.backends.mps.is_available():
-            print("[IndicParler] MPS not available, using CPU")
-            self.device = "cpu"
+        # 1. Determine local path
+        project_root = os.getcwd()
+        local_dir = os.path.join(project_root, "models", "tts", "indic-parler-tts")
+        
+        print(f"[IndicParler] Loading from {local_dir} ...")
 
-        print("[IndicParler] Loading model ...")
-        model_id = "ai4bharat/indic-parler-tts-mini"
+        if not os.path.exists(os.path.join(local_dir, "config.json")):
+            print(f"[IndicParler] Error: Local files not found in {local_dir}")
+            print("[IndicParler] Please download files manually from HuggingFace.")
+            return
 
+        # Load everything from the local folder
         self.model = ParlerTTSForConditionalGeneration.from_pretrained(
-            model_id
+            local_dir,
+            local_files_only=True
         ).to(self.device)
-
-        # Parler-TTS uses TWO tokenizers:
-        # 1. tokenizer → for the input text (what to say)
-        # 2. description_tokenizer → for the style caption
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self.description_tokenizer = AutoTokenizer.from_pretrained(
-            self.model.config.text_encoder._name_or_path
+        
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            local_dir, 
+            local_files_only=True
         )
-        print("[IndicParler] Model loaded.")
+
+        # The description tokenizer is usually the same or bundled
+        self.description_tokenizer = AutoTokenizer.from_pretrained(
+            local_dir,
+            local_files_only=True
+        )
+        print("[IndicParler] Local model loaded successfully.")
 
     def synthesize(self, text: str, voice_id: str = "default") -> bytes:
         """

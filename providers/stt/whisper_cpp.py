@@ -54,16 +54,42 @@ class WhisperCppProvider(BaseSTTProvider):
             )
 
     def transcribe(self, audio_bytes: bytes) -> dict:
-        """Transcribe audio bytes using whisper.cpp."""
+        """
+        Transcribe audio bytes using whisper.cpp.
+        Handles conversion from various formats (WebM, etc.) to 16kHz mono WAV.
+        """
+        import io
+        import librosa
+        import soundfile as sf
 
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        # 1. Write incoming bytes to a temporary file first
+        with tempfile.NamedTemporaryFile(suffix=".tmp", delete=False) as f:
             f.write(audio_bytes)
-            tmp_path = f.name
+            raw_path = f.name
 
+        processed_path = None
         try:
-            # pywhispercpp returns a list of Segment objects
-            segments = self.model.transcribe(tmp_path, language=self.language)
+            # 2. Use librosa to load and convert to 16kHz mono
+            # librosa.load is robust and handles resampling/mono conversion
+            y, sr = librosa.load(raw_path, sr=16000)
+            
+            # 3. Write as a clean RIFF WAV file (16-bit PCM)
+            # whisper.cpp requires this specific format
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+                sf.write(f.name, y, 16000, format='WAV', subtype='PCM_16')
+                processed_path = f.name
+
+            # 4. Run transcription
+            segments = self.model.transcribe(processed_path, language=self.language)
             text = " ".join(s.text for s in segments)
             return {"text": text.strip(), "language": self.language}
+            
+        except Exception as e:
+            print(f"[WhisperCpp] Transcription error: {e}")
+            raise e
         finally:
-            os.unlink(tmp_path)
+            # Clean up both temporary files
+            if os.path.exists(raw_path):
+                os.unlink(raw_path)
+            if processed_path and os.path.exists(processed_path):
+                os.unlink(processed_path)

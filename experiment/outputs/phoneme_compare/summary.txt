@@ -1,0 +1,33 @@
+====================================================================
+  PHONEME PREPROCESSING EXPERIMENT SUMMARY
+====================================================================
+
+VARIANTS:
+
+  baseline
+     Current: everything through IndicXlit
+
+  phoneme
+     New: English words via gruut G2P → IPA → Devanagari
+
+  hybrid
+     Conservative: only override-dict words use G2P
+
+────────────────────────────────────────────────────────────────────
+WHAT TO LISTEN FOR:
+
+  baseline vs phoneme:
+    → English vowels: does 'email' sound like 'ee-mail' or 'em-ail'?
+    → Diphthongs: does 'laptop' sound like 'laep-top' or 'lap-top'?
+    → Fricatives: does 'schedule' start with 'sh' or 'sk'?
+
+  phoneme vs hybrid:
+    → Does the pure phoneme strategy handle all English words?
+    → Which words does hybrid fall back to IndicXlit for?
+
+────────────────────────────────────────────────────────────────────
+KEY QUESTION:
+  Do English words sound MORE natural with gruut G2P preprocessing?
+  If YES → integrate EnglishPhonemePreprocessor into main pipeline.
+  If NO  → investigate which IPA→Devanagari mappings need tuning.
+====================================================================

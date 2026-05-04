@@ -22,6 +22,8 @@ numpy                  # array math, used by all audio libs
 noisereduce    # noise reduction for TTS output cleanup
 scipy          # signal processing for EQ and reverbpip
 
+gruut                  # English G2P → IPA for Hinglish English-word preprocessing (optional but recommended)
+
 # ── Utilities ──────────────────────────────────────────────────
 pyyaml                 # read config.yaml
 psutil                 # CPU and RAM usage for monitor/stats.py

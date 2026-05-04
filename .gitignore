@@ -43,6 +43,9 @@ models/
 *.bin
 *.onnx
 
+# Generated Aksharantar Hindi lexicon (~tens of MB); run scripts/build_aksharantar_hi_lexicon.py
+data/lexicons/aksharantar_hi.tsv
+
 # Data & Audio outputs
 static/audio/
 temp_audio/

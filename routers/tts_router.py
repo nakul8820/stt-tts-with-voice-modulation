@@ -123,13 +123,6 @@ async def synthesize(req: SynthesizeRequest):
         # Step 1: Generate raw audio from the TTS model
         audio_bytes = _provider.synthesize(req.text, req.voice_id)
 
-        # ── THE ONE NEW LINE ───────────────────────────────────
-        # Step 2: Apply Layer 2 post-processing modulation.
-        # apply_modulation() reads config.yaml internally so it
-        # always uses the latest admin settings.
-        audio_bytes = apply_modulation(audio_bytes)
-        # ──────────────────────────────────────────────────────
-
     latency_ms = round((time.perf_counter() - start) * 1000, 2)
     print(f"[TTS] {len(req.text)} chars in {latency_ms}ms")
 
@@ -228,7 +221,6 @@ async def preview_voice(
 
     # Reuse the exact same pipeline as the user endpoint
     audio_bytes = _provider.synthesize(req.text, "default")
-    audio_bytes = apply_modulation(audio_bytes)
 
     return Response(
         content=audio_bytes,

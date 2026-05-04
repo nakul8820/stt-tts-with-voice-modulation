@@ -88,6 +88,10 @@ def get_tts_provider() -> BaseTTSProvider:
         from providers.tts.mms_provider import MMSProvider
         return MMSProvider(tts_cfg)
 
+    elif provider_name == "mms_hinglish":
+        from providers.mms_hinglish_provider import MmsHinglishProvider
+        return MmsHinglishProvider(tts_cfg)
+
     elif provider_name == "piper":
         from providers.tts.piper_provider import PiperProvider
         return PiperProvider(tts_cfg)
@@ -95,5 +99,5 @@ def get_tts_provider() -> BaseTTSProvider:
     else:
         raise ValueError(
             f"Unknown TTS provider: '{provider_name}'. "
-            f"Valid options: coqui_xtts, indic_parler, piper"
+            f"Valid options: coqui_xtts, indic_parler, mms, mms_hinglish, piper"
         )

@@ -1,0 +1,351 @@
+{
+  "experiment": "english_phoneme_preprocessing",
+  "model": "facebook/mms-tts-hin",
+  "variants": [
+    {
+      "name": "baseline",
+      "description": "Current: everything through IndicXlit"
+    },
+    {
+      "name": "phoneme",
+      "description": "New: English words via gruut G2P → IPA → Devanagari"
+    },
+    {
+      "name": "hybrid",
+      "description": "Conservative: only override-dict words use G2P"
+    }
+  ],
+  "model_load_time_s": 19.61,
+  "sentences": [
+    {
+      "index": 1,
+      "input": "aaj mera email check karna hai",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "आज मेरा ईमेल चेक करना है",
+          "total_ms": 17064.0,
+          "audio_dur_ms": 2448.0,
+          "rtf": 6.971,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_01_aaj_mera_email_check_karna_hai/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "आज मेरा ईमेल चेक करना है",
+          "total_ms": 529.4,
+          "audio_dur_ms": 2336.0,
+          "rtf": 0.227,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_01_aaj_mera_email_check_karna_hai/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "आज मेरा ईमेल चेक करना है",
+          "total_ms": 429.2,
+          "audio_dur_ms": 2496.0,
+          "rtf": 0.172,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_01_aaj_mera_email_check_karna_hai/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "input": "please apna laptop charge karo",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "प्लीज अपना लैपटॉप चार्ज करो",
+          "total_ms": 979.8,
+          "audio_dur_ms": 2352.0,
+          "rtf": 0.417,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_02_please_apna_laptop_charge_karo/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "प्लीज अपना लैपटॉप चार्ज करो",
+          "total_ms": 367.1,
+          "audio_dur_ms": 2432.0,
+          "rtf": 0.151,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_02_please_apna_laptop_charge_karo/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "प्लीज अपना लैपटॉप चार्ज करो",
+          "total_ms": 235.6,
+          "audio_dur_ms": 2352.0,
+          "rtf": 0.1,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_02_please_apna_laptop_charge_karo/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 3,
+      "input": "presentation ready hai deadline se pehle",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "प्रेजेंटेशन रेडी है डेडलाइन से पहले",
+          "total_ms": 1519.1,
+          "audio_dur_ms": 5216.0,
+          "rtf": 0.291,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_03_presentation_ready_hai_deadline_se_pehle/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "प्रेजेंटेशन रेडी है डेडलाइन से पहले",
+          "total_ms": 623.3,
+          "audio_dur_ms": 3664.0,
+          "rtf": 0.17,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_03_presentation_ready_hai_deadline_se_pehle/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "प्रेजेंटेशन रेडी है डेडलाइन से पहले",
+          "total_ms": 578.9,
+          "audio_dur_ms": 3456.0,
+          "rtf": 0.168,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_03_presentation_ready_hai_deadline_se_pehle/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "input": "aaj mera meeting hai at 3 PM",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "आज मेरा मीटिंग है एट तीन पीएम",
+          "total_ms": 902.0,
+          "audio_dur_ms": 3184.0,
+          "rtf": 0.283,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_04_aaj_mera_meeting_hai_at_3_PM/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "आज मेरा मीटिंग है एट तीन पीएम",
+          "total_ms": 445.7,
+          "audio_dur_ms": 3104.0,
+          "rtf": 0.144,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_04_aaj_mera_meeting_hai_at_3_PM/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "आज मेरा मीटिंग है एट तीन पीएम",
+          "total_ms": 421.2,
+          "audio_dur_ms": 3344.0,
+          "rtf": 0.126,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_04_aaj_mera_meeting_hai_at_3_PM/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 5,
+      "input": "yeh project ka schedule fix karo",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "येह प्रोजेक्ट का शेड्यूल फिक्स करो",
+          "total_ms": 998.0,
+          "audio_dur_ms": 3360.0,
+          "rtf": 0.297,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_05_yeh_project_ka_schedule_fix_karo/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "येह प्रोजेक्ट का शेड्यूल फिक्स करो",
+          "total_ms": 558.6,
+          "audio_dur_ms": 3520.0,
+          "rtf": 0.159,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_05_yeh_project_ka_schedule_fix_karo/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "येह प्रोजेक्ट का शेड्यूल फिक्स करो",
+          "total_ms": 793.6,
+          "audio_dur_ms": 3120.0,
+          "rtf": 0.254,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_05_yeh_project_ka_schedule_fix_karo/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 6,
+      "input": "mera phone download nahi ho raha",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "मेरा फोन डाउनलोड नही हो रहा",
+          "total_ms": 779.6,
+          "audio_dur_ms": 2384.0,
+          "rtf": 0.327,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_06_mera_phone_download_nahi_ho_raha/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "मेरा फोन डाउनलोड नही हो रहा",
+          "total_ms": 679.1,
+          "audio_dur_ms": 2160.0,
+          "rtf": 0.314,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_06_mera_phone_download_nahi_ho_raha/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "मेरा फोन डाउनलोड नही हो रहा",
+          "total_ms": 767.6,
+          "audio_dur_ms": 2256.0,
+          "rtf": 0.34,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_06_mera_phone_download_nahi_ho_raha/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "input": "office conference call hai abhi",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "ऑफिस कॉन्फ्रेंस कॉल है अभी",
+          "total_ms": 1219.3,
+          "audio_dur_ms": 2528.0,
+          "rtf": 0.482,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_07_office_conference_call_hai_abhi/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "ऑफिस कॉन्फ्रेंस कॉल है अभी",
+          "total_ms": 467.0,
+          "audio_dur_ms": 2576.0,
+          "rtf": 0.181,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_07_office_conference_call_hai_abhi/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "ऑफिस कॉन्फ्रेंस कॉल है अभी",
+          "total_ms": 819.6,
+          "audio_dur_ms": 2288.0,
+          "rtf": 0.358,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_07_office_conference_call_hai_abhi/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 8,
+      "input": "please feedback bhejo review ke baad",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "प्लीज फीडबैक भेजो रिव्यू के बाद",
+          "total_ms": 1293.3,
+          "audio_dur_ms": 2512.0,
+          "rtf": 0.515,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_08_please_feedback_bhejo_review_ke_baad/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "प्लीज फीडबैक भेजो रिव्यू के बाद",
+          "total_ms": 474.6,
+          "audio_dur_ms": 2640.0,
+          "rtf": 0.18,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_08_please_feedback_bhejo_review_ke_baad/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "प्लीज फीडबैक भेजो रिव्यू के बाद",
+          "total_ms": 636.1,
+          "audio_dur_ms": 2560.0,
+          "rtf": 0.248,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_08_please_feedback_bhejo_review_ke_baad/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 9,
+      "input": "client ko message bhej do abhi",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "क्लाइंट को मैसेज भेज दो अभी",
+          "total_ms": 937.7,
+          "audio_dur_ms": 2672.0,
+          "rtf": 0.351,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_09_client_ko_message_bhej_do_abhi/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "क्लाइंट को मैसेज भेज दो अभी",
+          "total_ms": 813.9,
+          "audio_dur_ms": 2576.0,
+          "rtf": 0.316,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_09_client_ko_message_bhej_do_abhi/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "क्लाइंट को मैसेज भेज दो अभी",
+          "total_ms": 1372.4,
+          "audio_dur_ms": 2736.0,
+          "rtf": 0.502,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_09_client_ko_message_bhej_do_abhi/hybrid.wav"
+        }
+      }
+    },
+    {
+      "index": 10,
+      "input": "payment error aa raha hai dashboard mein",
+      "variants": {
+        "baseline": {
+          "success": true,
+          "description": "Current: everything through IndicXlit",
+          "devanagari": "पेमेंट एरर आ रहा है डैशबोर्ड में",
+          "total_ms": 2195.1,
+          "audio_dur_ms": 3216.0,
+          "rtf": 0.683,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_10_payment_error_aa_raha_hai_dashboard_mein/baseline.wav"
+        },
+        "phoneme": {
+          "success": true,
+          "description": "New: English words via gruut G2P → IPA → Devanagari",
+          "devanagari": "पेमेंट एरर आ रहा है डैशबोर्ड में",
+          "total_ms": 787.7,
+          "audio_dur_ms": 3200.0,
+          "rtf": 0.246,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_10_payment_error_aa_raha_hai_dashboard_mein/phoneme.wav"
+        },
+        "hybrid": {
+          "success": true,
+          "description": "Conservative: only override-dict words use G2P",
+          "devanagari": "पेमेंट एरर आ रहा है डैशबोर्ड में",
+          "total_ms": 793.0,
+          "audio_dur_ms": 3344.0,
+          "rtf": 0.237,
+          "output_file": "/Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/phoneme_compare/sentence_10_payment_error_aa_raha_hai_dashboard_mein/hybrid.wav"
+        }
+      }
+    }
+  ]
+}

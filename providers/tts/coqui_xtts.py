@@ -93,18 +93,13 @@ class CoquiXTTSProvider(BaseTTSProvider):
         )
         self.model.to(self.device)
 
-        # ── OPTIMIZATION: Pre-compute speaker latents ──
-        # We compute the "voice identity" once during startup.
-        # This saves 1-2 seconds per request.
-        print(f"[CoquiXTTS] Pre-computing speaker latents for {self.voice_profiles['default']}...")
-        ref_path = self.voice_profiles.get("default")
-        if ref_path and os.path.exists(ref_path):
-            self.default_gpt_cond, self.default_speaker_embedding = \
-                self.model.get_conditioning_latents(audio_path=[ref_path])
-        else:
-            speaker_name = "Daisy Studious"
-            self.default_gpt_cond = self.model.speaker_manager.speakers[speaker_name]["gpt_cond_latent"]
-            self.default_speaker_embedding = self.model.speaker_manager.speakers[speaker_name]["speaker_embedding"]
+        # ── OPTIMIZATION: Use high-quality built-in speaker ──
+        # We use 'Daisy Studious' as the default because it is one of the 
+        # most natural and least robotic built-in voices in XTTS v2.
+        print("[CoquiXTTS] Using high-quality built-in 'Daisy Studious' as default voice.")
+        speaker_name = "Daisy Studious"
+        self.default_gpt_cond = self.model.speaker_manager.speakers[speaker_name]["gpt_cond_latent"]
+        self.default_speaker_embedding = self.model.speaker_manager.speakers[speaker_name]["speaker_embedding"]
 
         print("[CoquiXTTS] XTTS v2 loaded and optimized.")
 
@@ -124,6 +119,11 @@ class CoquiXTTSProvider(BaseTTSProvider):
         temperature = layer1["temperature"]
         speed       = layer1["speed"]
 
+        # ── SPEED FIX: Ensure text ends with punctuation ──
+        # XTTS v2 often generates infinite silence if there is no period at the end.
+        if not text.strip().endswith((".", "!", "?")):
+            text = text.strip() + "."
+
         print(f"[CoquiXTTS] Synthesizing: '{text}' (temp={temperature}, speed={speed})")
 
         # ── OPTIMIZATION: Use torch.inference_mode() ──
@@ -135,11 +135,19 @@ class CoquiXTTSProvider(BaseTTSProvider):
                 speaker_embedding=self.default_speaker_embedding,
                 temperature=temperature,
                 speed=speed,
-                repetition_penalty=2.0,
+                repetition_penalty=1.2,
+                top_k=50,
+                top_p=0.8,
+                enable_text_splitting=True
             )
 
         # out["wav"] is a numpy array of float32 audio samples
         audio_np = np.array(out["wav"], dtype=np.float32)
+
+        # ── NEW: Trim silence ──
+        # XTTS v2 often generates long trailing silence. This cuts it off.
+        import librosa
+        audio_np, _ = librosa.effects.trim(audio_np, top_db=30)
 
         # Encode to WAV bytes
         buffer = io.BytesIO()

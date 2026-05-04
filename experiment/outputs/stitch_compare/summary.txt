@@ -1,0 +1,59 @@
+====================================================================
+  HINGLISH MMS STITCH — COMPARISON EXPERIMENT SUMMARY
+====================================================================
+
+WHAT TO LISTEN FOR PER VARIANT:
+
+  v1_raw_eng
+     No normalization. English words go to MMS-English model. You'll hear two distinct voices but natural English pronunciation.
+
+  v2_raw_phonetic
+     No normalization. English words phonetically mapped to Devanagari and spoken by MMS-Hindi. One consistent voice, Indian-accented English.
+
+  v3_normalized_eng
+     Volume-matched between models. English words go to MMS-English. Reduces loudness jumps. Two voices but at same volume level.
+
+  v4_normalized_phonetic
+     Volume-matched. English words phonetically spoken by MMS-Hindi. One voice, Indian accent, volume consistent throughout.
+
+  v5_tuned_eng
+     VITS noise/length parameters tuned per model + brightness matching. Tries to blend two model voices toward common speaking style. English words from MMS-English.
+
+  v6_tuned_phonetic
+     VITS tuned parameters + brightness matching + phonetic English. One Hindi speaker throughout, tuned for consistency. Best shot at a natural unified voice.
+
+────────────────────────────────────────────────────────────────────
+KEY QUESTIONS TO ANSWER WHILE LISTENING:
+
+  1. v1 vs v3 vs v5 (all use MMS-English)
+     → Does normalization/tuning reduce the voice-switch jarring?
+
+  2. v2 vs v4 vs v6 (all use Hindi phonetic for English)
+     → Does consistent voice outweigh slightly accented English?
+
+  3. Odd (eng) vs Even (phonetic) — same strategy, different model
+     v1 vs v2, v3 vs v4, v5 vs v6
+     → Which English approach sounds more natural?
+
+────────────────────────────────────────────────────────────────────
+LATENCY SUMMARY (ms, total synthesis time):
+
+  Variant                               Avg      Min      Max
+  ──────────────────────────────── ──────── ──────── ────────
+  v1_raw_eng                          1125ms     444ms    7464ms
+  v2_raw_phonetic                      643ms     459ms    1083ms
+  v3_normalized_eng                    640ms     465ms     999ms
+  v4_normalized_phonetic               657ms     475ms    1017ms
+  v5_tuned_eng                         655ms     461ms    1058ms
+  v6_tuned_phonetic                    636ms     463ms    1031ms
+
+  Model load time: 99.8s
+
+────────────────────────────────────────────────────────────────────
+OUTPUT FILES:
+  /Users/nakulpatel/Desktop/stt-tts_with-voice-modulation/experiment/outputs/stitch_compare
+
+  Each sentence folder contains 6 .wav files:
+  v1_raw_eng.wav, v2_raw_phonetic.wav, v3_normalized_eng.wav,
+  v4_normalized_phonetic.wav, v5_tuned_eng.wav, v6_tuned_phonetic.wav
+====================================================================

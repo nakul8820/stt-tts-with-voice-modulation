@@ -1,0 +1,51 @@
+# experiment/test_sentences.txt
+# ─────────────────────────────────────────────────────────────────────────────
+# Hinglish Test Sentences
+# One sentence per line. Blank lines and lines starting with # are ignored.
+# Run with: python experiment/run_experiment.py --file experiment/test_sentences.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Basic Hinglish ────────────────────────────────────────────────────────────
+aaj mera meeting hai at 3 PM
+kal office nahi jaana mujhe
+kya tum free ho abhi
+theek hai main aa jaunga
+
+# ── English words embedded naturally ─────────────────────────────────────────
+mera phone charge nahi ho raha
+please apna email check karo
+yeh project deadline kal hai
+laptop slow chal raha hai
+wifi ka password kya hai
+
+# ── Numbers and times ─────────────────────────────────────────────────────────
+meeting 5 baje hai conference room mein
+mujhe 2 ghante aur chahiye kaam khatam karne ke liye
+kal subah 10 baje call hai
+50 rupaye ka recharge kar do
+
+# ── Conversational ────────────────────────────────────────────────────────────
+bhai kal team call hai aur mujhe presentation ready karni hai
+kya tum mujhe help kar sakte ho is problem ko solve karne mein
+mera internet slow chal raha hai aaj
+yeh file download ho gayi kya
+haan boss ne approve kar diya proposal
+
+# ── Slightly formal / work context ───────────────────────────────────────────
+aapka order dispatch ho gaya hai aur 2 din mein deliver ho jayega
+iss issue ko fix karna bahut urgent hai
+kya aapne report submit kar di
+meeting reschedule ho gayi hai
+
+# ── Casual / everyday ────────────────────────────────────────────────────────
+yaar kya chal raha hai
+chai peeni hai kya
+movie dekhne chalein aaj raat
+bus 10 minute mein aayegi
+khana khaya kya tune
+
+# ── Longer sentences ──────────────────────────────────────────────────────────
+maine socha tha ki aaj kaam jaldi khatam ho jayega lekin nahi hua
+kya tum mujhe bata sakte ho ki yeh kaise kaam karta hai
+please is document ko review karke mujhe feedback do
+hum log kal shaam ko milte hain aur plan finalize karte hain

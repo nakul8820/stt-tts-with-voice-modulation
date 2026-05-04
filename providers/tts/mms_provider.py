@@ -12,31 +12,60 @@ from core.base_tts import BaseTTSProvider
 
 class MMSProvider(BaseTTSProvider):
     def __init__(self, cfg: dict):
-        self.device = cfg.get("device", "cpu")
+        # Force CPU for MMS as it is very fast and avoids MPS bugs
+        self.device = "cpu"
         self.model = None
         self.tokenizer = None
-        # MMS uses specific repo IDs for different languages
-        # 'facebook/mms-tts-hin' is the Hindi model.
         self.model_id = "facebook/mms-tts-hin"
 
     def load(self) -> None:
-        """Load MMS model and tokenizer."""
+        """Load MMS model from local directory."""
         from transformers import VitsModel, AutoTokenizer
+        import os
 
-        print(f"[MMS] Loading {self.model_id} ...")
+        # Point to the local folder
+        local_dir = os.path.join("models", "tts", "mms-hin")
         
-        # This will download automatically (no login required)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
-        self.model = VitsModel.from_pretrained(self.model_id).to(self.device)
+        print(f"[MMS] Loading model from {local_dir} ...")
         
-        print("[MMS] Model ready.")
+        if not os.path.exists(local_dir):
+            print(f"[MMS] ERROR: Folder {local_dir} not found!")
+            return
+
+        self.tokenizer = AutoTokenizer.from_pretrained(local_dir, local_files_only=True)
+        # Force the model to Float32 and CPU for absolute stability
+        self.model = VitsModel.from_pretrained(
+            local_dir, 
+            local_files_only=True,
+            torch_dtype=torch.float32
+        ).to(self.device).float()
+        
+        print("[MMS] Model ready and forced to Float32.")
 
     def synthesize(self, text: str, voice_id: str = "default") -> bytes:
         """Convert text to audio using MMS (VITS)."""
-        inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
+        inputs = self.tokenizer(text, return_tensors="pt")
+        
+        # input_ids MUST be Long, other tensors (attention_mask) stay as they are
+        # but all move to the CPU (self.device)
+        model_inputs = {}
+        for k, v in inputs.items():
+            if k == "input_ids":
+                model_inputs[k] = v.to(self.device).long()
+            else:
+                model_inputs[k] = v.to(self.device)
 
-        with torch.no_grad():
-            output = self.model(**inputs).waveform
+        with torch.inference_mode():
+            # Safety check: if input_ids are empty or too short, VITS will crash
+            if model_inputs["input_ids"].shape[1] < 1:
+                print("[MMS] ERROR: Input text resulted in 0 tokens. Ensure you are using Hindi characters.")
+                return b""
+                
+            try:
+                output = self.model(**model_inputs).waveform
+            except Exception as e:
+                print(f"[MMS] Generation error: {e}")
+                return b""
 
         # Convert tensor to numpy float32
         audio_np = output.cpu().numpy().squeeze().astype(np.float32)

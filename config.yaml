@@ -1,33 +1,31 @@
 admin:
   password: 123456
   username: admin
-
 modulation:
-  active_preset: natural
+  active_preset: friendly
   bass: 0
   denoise: true
-  expressiveness: 5
+  expressiveness: 7
   expresssiveness: 5
   normalize: true
-  pitch_semitones: 0
+  pitch_semitones: 1
   reverb: false
-  speed_model: 1.0
-  speed_post: 1.0
-  treble: 0
-  volume_gain: 1.5
-
+  speed_model: 1.1
+  speed_post: 1.1
+  treble: 1
+  volume_gain: 1.33
 presets:
   custom:
     bass: 0
     denoise: true
-    expressiveness: 5
+    expressiveness: 9
+    normalize: true
     pitch_semitones: 0
     reverb: false
-    speed_model: 1.0
-    speed_post: 1.0
+    speed_model: 1.4
+    speed_post: 1.4
     treble: 0
-    volume_gain: 1.0
-  
+    volume_gain: 2.0
   deep:
     bass: 3
     denoise: true
@@ -39,7 +37,6 @@ presets:
     speed_post: 0.9
     treble: -2
     volume_gain: 1.1
-  
   formal:
     bass: 1
     denoise: true
@@ -51,7 +48,6 @@ presets:
     speed_post: 0.95
     treble: -1
     volume_gain: 1.0
-  
   friendly:
     bass: 0
     denoise: true
@@ -63,7 +59,6 @@ presets:
     speed_post: 1.05
     treble: 1
     volume_gain: 1.0
-
   natural:
     bass: 0
     denoise: true
@@ -75,13 +70,17 @@ presets:
     speed_post: 1.0
     treble: 0
     volume_gain: 1.0
-
 stt:
   compute_type: float16
-  language: hi
+  language: en
   model_size: medium
   provider: whisper_cpp
-
 tts:
+  aksharantar_lexicon:
+    enabled: true
+    # Relative to project root. Generate with: python scripts/build_aksharantar_hi_lexicon.py
+    path: data/lexicons/aksharantar_hi.tsv
   device: mps
-  provider: coqui_xtts
+  english_phoneme_mode: phoneme
+  language: hi
+  provider: mms_hinglish

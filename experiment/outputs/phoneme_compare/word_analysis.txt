@@ -1,0 +1,26 @@
+====================================================================
+  ENGLISH WORD PHONEME ANALYSIS
+====================================================================
+
+  Word             IPA                            Devanagari           Source
+  ──────────────── ────────────────────────────── ──────────────────── ────────────
+  email            imˈeɪl                         ईमेल                 override_dict
+  laptop           lˈæptˌɑp                       लैपटॉप               override_dict
+  meeting          mˈitɪŋ                         मीटिंग               override_dict
+  presentation     pɹˌɛzəntˈeɪʃən                 प्रेजेंटेशन          override_dict
+  deadline         dˈɛdlˌaɪn                      डेडलाइन              override_dict
+  schedule         skˈɛd͡ʒul                      शेड्यूल              override_dict
+  download         dˈaʊnlˌoʊd                     डाउनलोड              override_dict
+  conference       kˈɑnfɚəns                      कॉन्फ्रेंस           override_dict
+  feedback         fˈidbˌæk                       फीडबैक               override_dict
+  review           ɹɪvjˈu                         रिव्यू               override_dict
+  message          mˈɛsɪd͡ʒ                       मैसेज                override_dict
+  payment          pˈeɪmənt                       पेमेंट               override_dict
+  error            ˈɛɹɚ                           एरर                  override_dict
+  dashboard        dˈæʃbˌɔɹd                      डैशबोर्ड             override_dict
+  check            t͡ʃˈɛk                         चेक                  override_dict
+  please           plˈiz                          प्लीज                override_dict
+  approve          əpɹˈuv                         अप्रूव               override_dict
+  update           ˈʌpdˌeɪt                       अपडेट                override_dict
+  feature          fˈit͡ʃɚ                        फीचर                 override_dict
+  urgent           ˈɚd͡ʒənt                       अर्जेंट              override_dict

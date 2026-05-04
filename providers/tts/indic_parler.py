@@ -37,8 +37,7 @@ class IndicParlerProvider(BaseTTSProvider):
         # "A female speaker with expressive, fast-paced Hindi speech."
         self.voice_description = cfg.get(
             "voice_description",
-            "A female speaker delivers clear, natural speech "
-            "at a moderate pace with a neutral tone."
+            "A slightly high-pitched female voice speaks with a clear and natural Indian accent. The speech is delivered at a moderate, conversational pace with natural pauses and warm intonation, recorded in a studio with no background noise."
         )
 
     def load(self) -> None:
@@ -57,10 +56,12 @@ class IndicParlerProvider(BaseTTSProvider):
             print("[IndicParler] Please download files manually from HuggingFace.")
             return
 
-        # Load everything from the local folder
+        # Load everything from the local folder with optimizations
+        print("[IndicParler] Optimizing for speed (FP16)...")
         self.model = ParlerTTSForConditionalGeneration.from_pretrained(
             local_dir,
-            local_files_only=True
+            local_files_only=True,
+            torch_dtype=torch.float16,  # 2x faster on M2
         ).to(self.device)
         
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -68,39 +69,35 @@ class IndicParlerProvider(BaseTTSProvider):
             local_files_only=True
         )
 
-        # The description tokenizer is usually the same or bundled
         self.description_tokenizer = AutoTokenizer.from_pretrained(
             local_dir,
             local_files_only=True
         )
-        print("[IndicParler] Local model loaded successfully.")
+
+        # ── OPTIMIZATION: Pre-compute description latents ──
+        print("[IndicParler] Pre-computing description latents...")
+        self.desc_inputs = self.description_tokenizer(
+            self.voice_description,
+            return_tensors="pt"
+        ).to(self.device)
+
+        print("[IndicParler] Local model loaded and optimized.")
 
     def synthesize(self, text: str, voice_id: str = "default") -> bytes:
         """
-        Convert text to audio using Parler-TTS.
-        Language is detected automatically from the text script.
-        Hindi Devanagari → Hindi voice, Latin script → English voice.
+        Convert text to audio using optimized Parler-TTS.
         """
-        # Tokenize the style description
-        desc_inputs = self.description_tokenizer(
-            self.voice_description,
-            return_tensors="pt"  # return PyTorch tensors
-        ).to(self.device)
-
         # Tokenize the actual text to speak
         text_inputs = self.tokenizer(
             text,
             return_tensors="pt"
         ).to(self.device)
 
-        # Generate audio
-        with torch.no_grad():
-            # torch.no_grad() disables gradient tracking.
-            # We're doing inference (not training), so we don't
-            # need gradients. This saves memory and speeds things up.
+        # Generate audio using optimized inference
+        with torch.inference_mode():
             generation = self.model.generate(
-                input_ids=desc_inputs.input_ids,
-                attention_mask=desc_inputs.attention_mask,
+                input_ids=self.desc_inputs.input_ids,
+                attention_mask=self.desc_inputs.attention_mask,
                 prompt_input_ids=text_inputs.input_ids,
                 prompt_attention_mask=text_inputs.attention_mask,
             )

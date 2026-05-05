@@ -30,7 +30,7 @@
 import re
 import time
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -103,36 +103,15 @@ class HinglishTransliterator:
     Thread-safe for read operations after load().
     """
 
-    def __init__(
-        self,
-        model_dir: Optional[str] = None,
-        english_phoneme_mode: str = "baseline",
-        aksharantar_lexicon_path: Optional[str] = None,
-    ):
+    def __init__(self, model_dir: Optional[str] = None):
         """
         Args:
             model_dir: Optional path to pre-downloaded IndicXlit models.
                        If None, uses default HuggingFace cache location.
-            english_phoneme_mode: How to handle English-looking tokens before MMS-Hindi:
-                baseline — IndicXlit only (legacy).
-                phoneme — English words via gruut G2P → IPA → Devanagari when detected;
-                         falls back to IndicXlit.
-                hybrid — Override dictionary only (curated Devanagari for common English);
-                         everything else via IndicXlit.
-            aksharantar_lexicon_path: If set, load Roman→Devanagari pairs (e.g. exported
-                from Aksharantar Hindi) and consult them before phoneme/Xlit.
         """
         self.model_dir = model_dir
         self._engine = None
         self._loaded = False
-        self._aksharantar_lexicon_path = aksharantar_lexicon_path
-        self._aksharantar_map: Optional[Dict[str, str]] = None
-        if english_phoneme_mode not in ("baseline", "phoneme", "hybrid"):
-            raise ValueError(
-                f"english_phoneme_mode must be baseline|phoneme|hybrid; got {english_phoneme_mode!r}"
-            )
-        self._english_phoneme_mode = english_phoneme_mode
-        self._phoneme_pp = None
 
     def load(self) -> None:
         """
@@ -175,32 +154,6 @@ class HinglishTransliterator:
         elapsed = time.time() - start
         logger.info(f"Transliterator ready in {elapsed:.2f}s (Mode: {self._mode})")
 
-        if self._english_phoneme_mode in ("phoneme", "hybrid"):
-            from modules.english_phoneme_preprocessor import EnglishPhonemePreprocessor
-
-            self._phoneme_pp = EnglishPhonemePreprocessor()
-            logger.info(
-                f"English phoneme path enabled: mode={self._english_phoneme_mode}"
-            )
-
-        if self._aksharantar_lexicon_path:
-            from modules.aksharantar_lexicon import try_load_lexicon
-
-            self._aksharantar_map = try_load_lexicon(self._aksharantar_lexicon_path)
-            if self._aksharantar_map:
-                logger.info(
-                    "Aksharantar-format lexicon active: %d entries (%s)",
-                    len(self._aksharantar_map),
-                    self._aksharantar_lexicon_path,
-                )
-
-    def _lookup_aksharantar(self, word: str) -> Optional[str]:
-        if not self._aksharantar_map:
-            return None
-        from modules.aksharantar_lexicon import normalize_lex_key
-
-        return self._aksharantar_map.get(normalize_lex_key(word))
-
     def _transliterate_word(self, word: str) -> str:
         """
         Transliterate a single romanized word to Devanagari using neural XlitEngine.
@@ -231,8 +184,7 @@ class HinglishTransliterator:
             → expand abbreviations
             → convert numbers to Hindi words
             → tokenize into words + punctuation
-            → optional Aksharantar lexicon hit (roman→Devanagari)
-            → phoneme / hybrid / baseline (IndicXlit, etc.)
+            → transliterate each word via IndicXlit
             → rejoin
 
         Args:
@@ -255,93 +207,30 @@ class HinglishTransliterator:
         # Step 2: Convert digit sequences to Hindi words
         text = _convert_numbers_in_text(text)
 
-        if self._english_phoneme_mode == "phoneme":
-            result = self._transliterate_tokens_phoneme(text)
-        elif self._english_phoneme_mode == "hybrid":
-            result = self._transliterate_tokens_hybrid(text)
-        else:
-            result = self._transliterate_tokens_baseline(text)
-        logger.debug(f"Transliteration: '{text}' → '{result}'")
-        print(f"Transliteration: '{text}' → '{result}'")
-        return result
-
-    def _transliterate_tokens_baseline(self, text: str) -> str:
+        # Step 3: Tokenize — split on whitespace but keep punctuation attached
+        # to words (MMS handles punctuation in Devanagari naturally)
         tokens = text.split()
         devanagari_tokens = []
+
         for token in tokens:
-            match = re.match(r"^([^\w]*)(\w[\w'-]*)([^\w]*)$", token)
+            # Strip leading/trailing punctuation for transliteration,
+            # then reattach
+            match = re.match(r'^([^\w]*)(\w[\w\'-]*)([^\w]*)$', token)
             if match:
                 prefix, word, suffix = match.groups()
-                if re.search(r"[\u0900-\u097F]", word):
+                # Skip if already Devanagari (pass-through)
+                if re.search(r'[\u0900-\u097F]', word):
                     devanagari_tokens.append(token)
                 else:
-                    lex = self._lookup_aksharantar(word)
-                    if lex:
-                        devanagari_tokens.append(prefix + lex + suffix)
-                    else:
-                        devanagari_tokens.append(
-                            prefix + self._transliterate_word(word) + suffix
-                        )
+                    transliterated = self._transliterate_word(word)
+                    devanagari_tokens.append(prefix + transliterated + suffix)
             else:
+                # Pure punctuation or whitespace token
                 devanagari_tokens.append(token)
-        return " ".join(devanagari_tokens)
 
-    def _transliterate_tokens_phoneme(self, text: str) -> str:
-        pp = self._phoneme_pp
-        if pp is None:
-            raise RuntimeError(
-                "Phoneme mode requires load() — EnglishPhonemePreprocessor missing"
-            )
-        tokens = text.split()
-        out = []
-        for token in tokens:
-            match = re.match(r"^([^\w]*)(\w[\w'-]*)([^\w]*)$", token)
-            if match:
-                prefix, word, suffix = match.groups()
-                if re.search(r"[\u0900-\u097F]", word):
-                    out.append(token)
-                    continue
-                lex = self._lookup_aksharantar(word)
-                if lex:
-                    out.append(prefix + lex + suffix)
-                    continue
-                if pp.is_english_word(word):
-                    dev = pp.english_word_to_devanagari(word)
-                    if dev:
-                        out.append(prefix + dev + suffix)
-                        continue
-                out.append(prefix + self._transliterate_word(word) + suffix)
-            else:
-                out.append(token)
-        return " ".join(out)
-
-    def _transliterate_tokens_hybrid(self, text: str) -> str:
-        pp = self._phoneme_pp
-        if pp is None:
-            raise RuntimeError(
-                "Hybrid mode requires load() — EnglishPhonemePreprocessor missing"
-            )
-        tokens = text.split()
-        out = []
-        for token in tokens:
-            match = re.match(r"^([^\w]*)(\w[\w'-]*)([^\w]*)$", token)
-            if match:
-                prefix, word, suffix = match.groups()
-                if re.search(r"[\u0900-\u097F]", word):
-                    out.append(token)
-                    continue
-                lex = self._lookup_aksharantar(word)
-                if lex:
-                    out.append(prefix + lex + suffix)
-                    continue
-                lower = word.lower()
-                if lower in pp.OVERRIDES:
-                    out.append(prefix + pp.OVERRIDES[lower] + suffix)
-                else:
-                    out.append(prefix + self._transliterate_word(word) + suffix)
-            else:
-                out.append(token)
-        return " ".join(out)
+        result = " ".join(devanagari_tokens)
+        logger.debug(f"Transliteration: '{text}' → '{result}'")
+        return result
 
     def transliterate_batch(self, texts: list) -> list:
         """
@@ -378,7 +267,7 @@ class RuleBasedHindiTransliterator:
             "diya": "दिया", "proposal": "प्रपोजल", "aapka": "आपका", "order": "ऑर्डर",
             "dispatch": "डिस्पैच", "gaya": "गया", "din": "दिन", "deliver": "डिलीवर",
             "jayega": "जायेगा", "issue": "इश्यू", "fix": "फिक्स", "karna": "करना",
-            "bahut": "बहुत", "urgent": "अर्जेंट"
+            "bahut": "बहुत", "urgent": "अर्जेंट", "how":""
         }
 
         # 2. Phonetic rules (Longer patterns first)

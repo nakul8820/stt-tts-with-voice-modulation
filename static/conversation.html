@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Chat with LLM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+            color: #f8fafc; 
+            padding: 2rem; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .card { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(10px);
+            padding: 2rem; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); 
+        }
+        h1 { 
+            color: #38bdf8; 
+            margin-bottom: 1.5rem; 
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        textarea, input { 
+            width: 100%; 
+            padding: 0.875rem; 
+            margin-bottom: 1.5rem; 
+            border-radius: 8px; 
+            border: 1px solid #475569; 
+            background: rgba(15, 23, 42, 0.6); 
+            color: #f8fafc; 
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        .output-toggle {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #e2e8f0;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .radio-label input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #38bdf8;
+        }
+        .button-group {
+            display: flex; 
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        button { 
+            background: #0ea5e9; 
+            color: #fff; 
+            border: none; 
+            padding: 0.875rem 1.5rem; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            transition: all 0.2s; 
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover { 
+            background: #0284c7; 
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button.recording { 
+            background: #ef4444; 
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .chat-log { 
+            margin-top: 2rem; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem; 
+            padding-right: 10px;
+        }
+        .chat-log::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-log::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.2); 
+            border-radius: 10px;
+        }
+        .chat-log::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 10px;
+        }
+        .message { 
+            padding: 1rem 1.25rem; 
+            border-radius: 12px; 
+            max-width: 85%; 
+            line-height: 1.5;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .user-msg { 
+            background: #1e293b; 
+            border: 1px solid #334155;
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+        }
+        .ai-msg { 
+            background: #0284c7; 
+            color: white;
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+        }
+        .status { 
+            font-size: 0.875rem; 
+            color: #94a3b8; 
+            text-align: center;
+            height: 20px;
+        }
+        .audio-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                Streaming Conversational AI
+            </h1>
+            
+            <label>System Prompt (Customize Persona):</label>
+            <input type="text" id="sys-prompt" value="You are a helpful Hinglish assistant. Keep your answers brief and conversational, no more than 2-3 sentences. Do not use asterisks or markdown in your speech.">
+            
+            <label>Output Preference:</label>
+            <div class="output-toggle">
+                <label class="radio-label">
+                    <input type="radio" name="output_pref" value="audio" checked>
+                    <span>Text & Speech</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="output_pref" value="text">
+                    <span>Text Only</span>
+                </label>
+            </div>
+            
+            <label>Your Message:</label>
+            <textarea id="user-text" rows="3" placeholder="Type a message or use the microphone to speak..."></textarea>
+            
+            <div class="button-group">
+                <button id="btn-send-text" onclick="sendText()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Send Text
+                </button>
+                <button id="btn-record" onclick="toggleRecording()" style="background: #334155;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    Record Voice
+                </button>
+            </div>
+            
+            <div id="status" class="status">Connected and ready.</div>
+            
+            <div class="chat-log" id="chat-log"></div>
+        </div>
+    </div>
+
+    <script>
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        let ws = new WebSocket(`${wsProtocol}//${window.location.host}/api/conversation`);
+        
+        const chatLog = document.getElementById('chat-log');
+        const statusEl = document.getElementById('status');
+        let currentAiMessageEl = null;
+        
+        // Audio playback queue
+        const audioQueue = [];
+        let isPlaying = false;
+        const audioPlayer = new Audio();
+        
+        // A tiny 1-sample silent WAV to unlock the audio context on iOS/Safari/Chrome
+        const SILENT_WAV = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        
+        function unlockAudio() {
+            // Play a silent sound immediately on user interaction to whitelist the audio element
+            audioPlayer.src = SILENT_WAV;
+            audioPlayer.play().catch(e => console.log("Unlock failed, but might still work:", e));
+        }
+        
+        audioPlayer.onended = () => {
+            playNextAudio();
+        };
+        
+        audioPlayer.onerror = (e) => {
+            console.error("Audio player error:", e);
+            isPlaying = false;
+            setTimeout(playNextAudio, 100);
+        };
+        
+        function playNextAudio() {
+            if (audioQueue.length > 0) {
+                isPlaying = true;
+                const blobUrl = audioQueue.shift();
+                
+                audioPlayer.src = blobUrl;
+                audioPlayer.play().catch(e => {
+                    console.error("Audio playback failed (Autoplay blocked?):", e);
+                    // Recover and try the next chunk instead of getting stuck
+                    isPlaying = false;
+                    setTimeout(playNextAudio, 100); 
+                });
+                
+                statusEl.innerHTML = `Speaking <span class="audio-indicator"></span>`;
+            } else {
+                isPlaying = false;
+                statusEl.innerText = "Response complete.";
+            }
+        }
+        
+        function appendToAudioQueue(base64Audio) {
+            try {
+                const byteCharacters = atob(base64Audio);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], {type: 'audio/wav'});
+                const blobUrl = URL.createObjectURL(blob);
+                
+                audioQueue.push(blobUrl);
+                if (!isPlaying) {
+                    playNextAudio();
+                }
+            } catch (e) {
+                console.error("Failed to decode audio base64:", e);
+            }
+        }
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.error) {
+                statusEl.innerText = `Error: ${data.error}`;
+                statusEl.style.color = "#ef4444";
+                return;
+            }
+            
+            if (data.type === 'stt_result') {
+                statusEl.innerText = "Transcribed voice. Generating response...";
+                appendMessage(data.text, 'user-msg');
+            } else if (data.type === 'chunk') {
+                statusEl.innerText = "Receiving stream...";
+                if (!currentAiMessageEl) {
+                    currentAiMessageEl = appendMessage("", 'ai-msg');
+                }
+                currentAiMessageEl.innerText += (currentAiMessageEl.innerText ? " " : "") + data.text;
+                chatLog.scrollTop = chatLog.scrollHeight;
+                
+                if (data.audio_b64) {
+                    appendToAudioQueue(data.audio_b64);
+                }
+            } else if (data.type === 'done') {
+                if (!isPlaying) {
+                    statusEl.innerText = "Response complete.";
+                }
+                currentAiMessageEl = null; // reset for next turn
+            }
+        };
+        
+        ws.onclose = () => {
+            statusEl.innerText = "WebSocket disconnected. Refresh the page to reconnect.";
+            statusEl.style.color = "#ef4444";
+        };
+
+        function appendMessage(text, className) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerText = text;
+            chatLog.appendChild(msgDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            return msgDiv;
+        }
+
+        function sendText() {
+            if (ws.readyState !== WebSocket.OPEN) {
+                alert("WebSocket is not connected. Please refresh the page.");
+                return;
+            }
+
+            const text = document.getElementById('user-text').value.trim();
+            if (!text) return;
+            
+            // Unlock audio context on user click!
+            unlockAudio();
+            
+            const sysPrompt = document.getElementById('sys-prompt').value;
+            const outputPref = document.querySelector('input[name="output_pref"]:checked').value;
+            
+            appendMessage(text, 'user-msg');
+            document.getElementById('user-text').value = '';
+            statusEl.innerText = "Generating response...";
+            statusEl.style.color = "#94a3b8";
+            
+            ws.send(JSON.stringify({
+                input_type: "text",
+                text: text,
+                system_prompt: sysPrompt,
+                output_type: outputPref
+            }));
+        }
+
+        // Recording logic
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        async function toggleRecording() {
+            if (ws.readyState !== WebSocket.OPEN) {
+                alert("WebSocket is not connected. Please refresh the page.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-record');
+            
+            if (!isRecording) {
+                // Unlock audio context on user click!
+                unlockAudio();
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64data = reader.result.split(',')[1];
+                            const sysPrompt = document.getElementById('sys-prompt').value;
+                            const outputPref = document.querySelector('input[name="output_pref"]:checked').value;
+                            
+                            statusEl.innerText = "Transcribing audio...";
+                            ws.send(JSON.stringify({
+                                input_type: "audio",
+                                audio_b64: base64data,
+                                system_prompt: sysPrompt,
+                                output_type: outputPref
+                            }));
+                        };
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg> Stop Recording`;
+                    btn.classList.add("recording");
+                    statusEl.innerText = "Listening...";
+                    
+                } catch (err) {
+                    console.error("Mic access denied", err);
+                    alert("Microphone access is required.");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg> Record Voice`;
+                btn.classList.remove("recording");
+            }
+        }
+    </script>
+</body>
+</html>

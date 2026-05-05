@@ -28,4 +28,4 @@ gruut                  # English G2P → IPA for Hinglish English-word preproces
 pyyaml                 # read config.yaml
 psutil                 # CPU and RAM usage for monitor/stats.py
 huggingface_hub        # download models from HuggingFace
-requests               # HTTP requests, used in download_models.py
+requests               # HTTP requests, used in download_models.pygroq==0.5.0

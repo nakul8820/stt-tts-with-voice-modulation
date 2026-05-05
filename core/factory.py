@@ -15,6 +15,7 @@ import yaml
 
 from core.base_stt import BaseSTTProvider
 from core.base_tts import BaseTTSProvider
+from providers.tts_sooktam2 import Sooktam2Provider
 
 
 def _load_config() -> dict:
@@ -95,6 +96,9 @@ def get_tts_provider() -> BaseTTSProvider:
     elif provider_name == "piper":
         from providers.tts.piper_provider import PiperProvider
         return PiperProvider(tts_cfg)
+
+    elif provider_name == "sooktam2":
+        return Sooktam2Provider(tts_cfg)
 
     else:
         raise ValueError(

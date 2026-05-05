@@ -80,9 +80,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from routers import stt_router, tts_router, conversation_router
+
 # Register our routers — this adds all the /api/... routes
 app.include_router(stt_router.router)
 app.include_router(tts_router.router)
+app.include_router(conversation_router.router)
 
 # ── Monitor Endpoints ──────────────────────────────────────────
 # These are called by the performance dashboard in the frontend.

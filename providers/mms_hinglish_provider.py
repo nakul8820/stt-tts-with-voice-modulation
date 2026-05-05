@@ -98,11 +98,7 @@ class MmsHinglishProvider(BaseTTSProvider):
                     resolved,
                 )
 
-        self._transliterator = HinglishTransliterator(
-            english_phoneme_mode=str(phoneme_mode).strip().lower(),
-            aksharantar_lexicon_path=aksh_path,
-        )
-
+        self._transliterator = HinglishTransliterator()
         self._speed = 1.0
 
     # ── Public API ────────────────────────────────────────────────────────────

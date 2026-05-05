@@ -1,6 +1,14 @@
+# config.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# Full config.yaml — only the  tts:  section has changed.
+# Switch the active provider by editing  tts.provider  below.
+# ─────────────────────────────────────────────────────────────────────────────
+
 admin:
   password: 123456
   username: admin
+
+# ── Voice modulation (applied after every TTS synthesis) ─────────────────────
 modulation:
   active_preset: friendly
   bass: 0
@@ -14,73 +22,103 @@ modulation:
   speed_post: 1.1
   treble: 1
   volume_gain: 1.33
-presets:
-  custom:
-    bass: 0
-    denoise: true
-    expressiveness: 9
-    normalize: true
-    pitch_semitones: 0
-    reverb: false
-    speed_model: 1.4
-    speed_post: 1.4
-    treble: 0
-    volume_gain: 2.0
-  deep:
-    bass: 3
-    denoise: true
-    expressiveness: 4
-    normalize: true
-    pitch_semitones: -4
-    reverb: false
-    speed_model: 0.9
-    speed_post: 0.9
-    treble: -2
-    volume_gain: 1.1
-  formal:
-    bass: 1
-    denoise: true
-    expressiveness: 3
-    normalize: true
-    pitch_semitones: -1
-    reverb: false
-    speed_model: 0.9
-    speed_post: 0.95
-    treble: -1
-    volume_gain: 1.0
-  friendly:
-    bass: 0
-    denoise: true
-    expressiveness: 7
-    normalize: true
-    pitch_semitones: 1
-    reverb: false
-    speed_model: 1.1
-    speed_post: 1.05
-    treble: 1
-    volume_gain: 1.0
-  natural:
-    bass: 0
-    denoise: true
-    expressiveness: 5
-    normalize: true
-    pitch_semitones: 0
-    reverb: false
-    speed_model: 1.0
-    speed_post: 1.0
-    treble: 0
-    volume_gain: 1.0
+
+  presets:
+    custom:
+      bass: 0
+      denoise: true
+      expressiveness: 9
+      normalize: true
+      pitch_semitones: 0
+      reverb: false
+      speed_model: 1.4
+      speed_post: 1.4
+      treble: 0
+      volume_gain: 2.0
+    deep:
+      bass: 3
+      denoise: true
+      expressiveness: 4
+      normalize: true
+      pitch_semitones: -4
+      reverb: false
+      speed_model: 0.9
+      speed_post: 0.9
+      treble: -2
+      volume_gain: 1.1
+    formal:
+      bass: 1
+      denoise: true
+      expressiveness: 3
+      normalize: true
+      pitch_semitones: -1
+      reverb: false
+      speed_model: 0.9
+      speed_post: 0.95
+      treble: -1
+      volume_gain: 1.0
+    friendly:
+      bass: 0
+      denoise: true
+      expressiveness: 7
+      normalize: true
+      pitch_semitones: 1
+      reverb: false
+      speed_model: 1.1
+      speed_post: 1.05
+      treble: 1
+      volume_gain: 1.0
+    natural:
+      bass: 0
+      denoise: true
+      expressiveness: 5
+      normalize: true
+      pitch_semitones: 0
+      reverb: false
+      speed_model: 1.0
+      speed_post: 1.0
+      treble: 0
+      volume_gain: 1.0
+
+# ── STT (unchanged) ───────────────────────────────────────────────────────────
 stt:
-  compute_type: float16
-  language: en
+  compute_type: int9
+  language: hi
   model_size: medium
   provider: whisper_cpp
+
+# ── TTS — Sooktam 2  ← CHANGED SECTION ───────────────────────────────────────
 tts:
-  aksharantar_lexicon:
-    enabled: true
-    # Relative to project root. Generate with: python scripts/build_aksharantar_hi_lexicon.py
-    path: data/lexicons/aksharantar_hi.tsv
-  device: mps
-  english_phoneme_mode: phoneme
-  language: hi
+  # ── Switch provider here ──────────────────────────────────────────────────
+  # Options: mms_hinglish | coqui | parler | sooktam2
   provider: mms_hinglish
+
+  # ── Sooktam 2 settings ───────────────────────────────────────────────────
+  # Language for synthesis.
+  # Supported: hindi, marathi, gujarati, tamil, telugu, kannada,
+  #            bengali, malayalam, odia, urdu, punjabi, english, hinglish
+  # "hinglish" is mapped internally to "hindi" (best result for code-mixed).
+  language: hinglish
+
+  # Device to run inference on.
+  # Options: cpu | cuda | mps (Apple Silicon)
+  device: cpu
+
+  # ── Default reference voice (used when no ref_wav is sent via the API) ───
+  # Record a clean 5-10 s WAV of ANY speaker you want to clone.
+  # 16 kHz mono is ideal.  Place it at the path below (relative to project root).
+  # Generate a placeholder with:
+  #   python scripts/make_ref_voice.py          (see script section below)
+  ref_wav: default.wav
+
+  # Exact transcript of ref_wav — update this to match what is
+  # actually spoken in your default.wav file.
+  ref_text: "नमस्ते, मैं आपकी कैसे मदद कर सकता हूँ?"
+
+  # ── Settings kept for reference (not used by Sooktam 2 directly) ─────────
+  # These were used by the old mms_hinglish provider.
+  # They are safe to leave here; Sooktam2Provider simply ignores them.
+  aksharantar_lexicon:
+    enabled: false
+    path: data/lexicons/aksharantar_hi.tsv
+  english_phoneme_mode: phoneme
